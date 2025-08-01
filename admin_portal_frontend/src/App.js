@@ -10,11 +10,14 @@ import "./components/Header.css";
 import "./components/MainLayout.css";
 import "./pages/LoginPage.css";
 import StudentManager from "./components/StudentManager";
+import UserManager from "./components/UserManager";
+import RoleManager from "./components/RoleManager";
+import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import { useCallback } from "react";
 import BackendConfigPage from "./components/BackendConfigPage";
 import "./components/BackendConfigPage.css";
 
-// Enhanced navigation and page routing for Students section.
+// Enhanced navigation and page routing for Admin Portal.
 function AdminApp() {
   const { user, logout } = useAuth();
   const [theme, setTheme] = useState("light");
@@ -29,7 +32,7 @@ function AdminApp() {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
-  // Update nav items with current page
+  // Navigation items for sidebar
   const navItems = [
     {
       label: "Dashboard",
@@ -44,10 +47,10 @@ function AdminApp() {
       active: activePage === "students"
     },
     {
-      label: "Config",
-      icon: "⚙️",
-      onClick: () => setActivePage("config"),
-      active: activePage === "config"
+      label: "Users",
+      icon: "👤",
+      onClick: () => setActivePage("users"),
+      active: activePage === "users"
     },
     {
       label: "Roles",
@@ -55,40 +58,24 @@ function AdminApp() {
       onClick: () => setActivePage("roles"),
       active: activePage === "roles"
     },
+    {
+      label: "Config",
+      icon: "⚙️",
+      onClick: () => setActivePage("config"),
+      active: activePage === "config"
+    },
   ];
 
   // Content switching by activePage
   let content = null;
-  if (activePage === "students") {
+  if (activePage === "dashboard") {
+    content = <AnalyticsDashboard />;
+  } else if (activePage === "students") {
     content = <StudentManager />;
-  } else if (activePage === "dashboard") {
-    content = (
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "48px",
-        }}
-      >
-        <img src={logo} className="App-logo" alt="logo" style={{ height: 100 }} />
-        <h2>Welcome to the Admin Portal</h2>
-        <p>
-          Use the sidebar to navigate admin features.
-          <br />
-          (This content area updates as you select sections.)
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </div>
-    );
+  } else if (activePage === "users") {
+    content = <UserManager />;
+  } else if (activePage === "roles") {
+    content = <RoleManager />;
   } else if (activePage === "config") {
     content = <BackendConfigPage />;
   } else {
