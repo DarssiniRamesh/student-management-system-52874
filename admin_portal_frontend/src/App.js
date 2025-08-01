@@ -9,18 +9,14 @@ import "./components/Sidebar.css";
 import "./components/Header.css";
 import "./components/MainLayout.css";
 import "./pages/LoginPage.css";
+import StudentManager from "./components/StudentManager";
+import { useCallback } from "react";
 
-// Demo navigation items (normally generated based on section/route)
-const demoNavItems = [
-  { label: "Dashboard", icon: "📊", onClick: () => {}, active: true },
-  { label: "Students", icon: "🎓", onClick: () => {}, active: false },
-  { label: "Config", icon: "⚙️", onClick: () => {}, active: false },
-  { label: "Roles", icon: "🛡️", onClick: () => {}, active: false },
-];
-
+// Enhanced navigation and page routing for Students section.
 function AdminApp() {
   const { user, logout } = useAuth();
   const [theme, setTheme] = useState("light");
+  const [activePage, setActivePage] = useState("dashboard");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -30,6 +26,70 @@ function AdminApp() {
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
+
+  // Update nav items with current page
+  const navItems = [
+    {
+      label: "Dashboard",
+      icon: "📊",
+      onClick: () => setActivePage("dashboard"),
+      active: activePage === "dashboard"
+    },
+    {
+      label: "Students",
+      icon: "🎓",
+      onClick: () => setActivePage("students"),
+      active: activePage === "students"
+    },
+    {
+      label: "Config",
+      icon: "⚙️",
+      onClick: () => setActivePage("config"),
+      active: activePage === "config"
+    },
+    {
+      label: "Roles",
+      icon: "🛡️",
+      onClick: () => setActivePage("roles"),
+      active: activePage === "roles"
+    },
+  ];
+
+  // Content switching by activePage
+  let content = null;
+  if (activePage === "students") {
+    content = <StudentManager />;
+  } else if (activePage === "dashboard") {
+    content = (
+      <div
+        style={{
+          textAlign: "center",
+          marginTop: "48px",
+        }}
+      >
+        <img src={logo} className="App-logo" alt="logo" style={{ height: 100 }} />
+        <h2>Welcome to the Admin Portal</h2>
+        <p>
+          Use the sidebar to navigate admin features.
+          <br />
+          (This content area updates as you select sections.)
+        </p>
+        <p>
+          Current theme: <strong>{theme}</strong>
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </div>
+    );
+  } else {
+    content = <div style={{ padding: 40 }}>Feature: <b>{activePage}</b> (Coming soon...)</div>;
+  }
 
   return (
     <ProtectedRoute fallback={<LoginPage />}>
@@ -41,33 +101,8 @@ function AdminApp() {
         >
           {theme === "light" ? "🌙 Dark" : "☀️ Light"}
         </button>
-        <MainLayout navItems={demoNavItems} user={user} onLogout={logout}>
-          {/* MAIN CONTENT DEMO */}
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: "48px",
-            }}
-          >
-            <img src={logo} className="App-logo" alt="logo" style={{ height: 100 }} />
-            <h2>Welcome to the Admin Portal</h2>
-            <p>
-              Use the sidebar to navigate admin features.
-              <br />
-              (This content area updates as you select sections.)
-            </p>
-            <p>
-              Current theme: <strong>{theme}</strong>
-            </p>
-            <a
-              className="App-link"
-              href="https://reactjs.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn React
-            </a>
-          </div>
+        <MainLayout navItems={navItems} user={user} onLogout={logout}>
+          {content}
         </MainLayout>
       </div>
     </ProtectedRoute>
