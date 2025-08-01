@@ -13,74 +13,77 @@ import StudentManager from "./components/StudentManager";
 import UserManager from "./components/UserManager";
 import RoleManager from "./components/RoleManager";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
-import { useCallback } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import BackendConfigPage from "./components/BackendConfigPage";
 import "./components/BackendConfigPage.css";
 
-// Enhanced navigation and page routing for Admin Portal.
-function AdminApp() {
-  const { user, logout } = useAuth();
-  const [theme, setTheme] = useState("light");
-  const [activePage, setActivePage] = useState("dashboard");
-
+/**
+ * Hook for setting theme with persistency in the Admin Portal.
+ */
+function useTheme() {
+  const [theme, setTheme] = useState(() => localStorage.getItem("admin_theme") || "light");
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("admin_theme", theme);
   }, [theme]);
-
   // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
+  const toggleTheme = () => setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  return [theme, toggleTheme];
+}
 
-  // Navigation items for sidebar
-  const navItems = [
+// Enhanced navigation and page routing for Admin Portal.
+function AdminAppRouter() {
+  const { user, logout } = useAuth();
+  const [theme, toggleTheme] = useTheme();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Map sidebar navigation to app routes.
+  // The key is used for <Route path>.
+  const itemDefs = [
     {
+      key: "/dashboard",
       label: "Dashboard",
       icon: "📊",
-      onClick: () => setActivePage("dashboard"),
-      active: activePage === "dashboard"
+      element: <AnalyticsDashboard />,
     },
     {
+      key: "/students",
       label: "Students",
       icon: "🎓",
-      onClick: () => setActivePage("students"),
-      active: activePage === "students"
+      element: <StudentManager />,
     },
     {
+      key: "/users",
       label: "Users",
       icon: "👤",
-      onClick: () => setActivePage("users"),
-      active: activePage === "users"
+      element: <UserManager />,
     },
     {
+      key: "/roles",
       label: "Roles",
       icon: "🛡️",
-      onClick: () => setActivePage("roles"),
-      active: activePage === "roles"
+      element: <RoleManager />,
     },
     {
+      key: "/config",
       label: "Config",
       icon: "⚙️",
-      onClick: () => setActivePage("config"),
-      active: activePage === "config"
+      element: <BackendConfigPage />,
     },
   ];
 
-  // Content switching by activePage
-  let content = null;
-  if (activePage === "dashboard") {
-    content = <AnalyticsDashboard />;
-  } else if (activePage === "students") {
-    content = <StudentManager />;
-  } else if (activePage === "users") {
-    content = <UserManager />;
-  } else if (activePage === "roles") {
-    content = <RoleManager />;
-  } else if (activePage === "config") {
-    content = <BackendConfigPage />;
-  } else {
-    content = <div style={{ padding: 40 }}>Feature: <b>{activePage}</b> (Coming soon...)</div>;
-  }
+  // Sidebar items (each can navigate to its route)
+  const navItems = itemDefs.map(({ key, label, icon }) => ({
+    label,
+    icon,
+    to: key,
+    active: location.pathname === key,
+    onClick: () => { if (location.pathname !== key) navigate(key); },
+  }));
+
+  // Find the first available item to redirect from "/"
+  const defaultRoute = "/dashboard";
 
   return (
     <ProtectedRoute fallback={<LoginPage />}>
@@ -93,7 +96,17 @@ function AdminApp() {
           {theme === "light" ? "🌙 Dark" : "☀️ Light"}
         </button>
         <MainLayout navItems={navItems} user={user} onLogout={logout}>
-          {content}
+          <Routes>
+            <Route path="/" element={<Navigate to={defaultRoute} replace />} />
+            {itemDefs.map(({ key, element }) =>
+              <Route key={key} path={key} element={element} />
+            )}
+            {/* 404 fallback */}
+            <Route path="*" element={<div style={{ padding: 40, textAlign: 'center' }}>
+              <h2>Not Found</h2>
+              <div>That page does not exist.</div>
+            </div>} />
+          </Routes>
         </MainLayout>
       </div>
     </ProtectedRoute>
@@ -102,10 +115,12 @@ function AdminApp() {
 
 // PUBLIC_INTERFACE
 function App() {
-  // Wrap everything with AuthProvider as root
+  // Wrap everything with AuthProvider as root and with BrowserRouter
   return (
     <AuthProvider>
-      <AdminApp />
+      <BrowserRouter>
+        <AdminAppRouter />
+      </BrowserRouter>
     </AuthProvider>
   );
 }
