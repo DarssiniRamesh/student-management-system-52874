@@ -11,6 +11,8 @@ import "./components/MainLayout.css";
 import "./pages/LoginPage.css";
 import StudentManager from "./components/StudentManager";
 import { useCallback } from "react";
+import BackendConfigPage from "./components/BackendConfigPage";
+import "./components/BackendConfigPage.css";
 
 // Enhanced navigation and page routing for Students section.
 function AdminApp() {
@@ -87,6 +89,8 @@ function AdminApp() {
         </a>
       </div>
     );
+  } else if (activePage === "config") {
+    content = <BackendConfigPage />;
   } else {
     content = <div style={{ padding: 40 }}>Feature: <b>{activePage}</b> (Coming soon...)</div>;
   }

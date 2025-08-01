@@ -1,0 +1,36 @@
+.backend-config-container {
+  background: var(--bg-secondary, #f8f9fa);
+  border-radius: 11px;
+  box-shadow: 0 4px 16px rgba(40,50,60,0.08);
+  padding: 28px 22px 22px 22px;
+  margin-bottom: 38px;
+}
+.backend-config-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-bottom: 17px;
+  font-size: 1.04rem;
+  color: var(--text-primary, #1a1a1a);
+}
+.backend-config-form input[type=text],
+.backend-config-form input[type=number],
+.backend-config-form select,
+.backend-config-form textarea {
+  font-size: 1rem;
+  padding: 7px 10px;
+  border: 1px solid var(--border-color, #e9ecef);
+  border-radius: 6px;
+  background: #fff;
+  margin-top: 5px;
+}
+.backend-config-form input[type=checkbox] {
+  width: 19px;
+  height: 19px;
+}
+.backend-config-form textarea {
+  resize: vertical;
+}
+.backend-config-form button {
+  margin-top: 7px;
+}
